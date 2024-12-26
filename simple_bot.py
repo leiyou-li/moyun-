@@ -19,7 +19,10 @@ from emotional_system import EmotionalState, SelfReflection
 from self_improvement import SelfImprovement
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 class WebLearner:
@@ -121,7 +124,7 @@ class WebLearner:
         return "\n".join(text_pieces)
         
     def _is_relevant(self, text, topic):
-        """判断文本是否与主题相关"""
+        """判断文本是否��主题相关"""
         # 使用jieba分词
         topic_words = set(jieba.cut(topic))
         text_words = set(jieba.cut(text))
@@ -267,7 +270,7 @@ class SimpleBot:
                     
                 except Exception as e:
                     print(f"[自我优化] 出错: {e}")
-                    time.sleep(300)  # 出���后等待5分钟再试
+                    time.sleep(300)  # 出错后等待5分钟再试
                     
         # 启动优化线程
         thread = threading.Thread(target=improvement_loop)
@@ -296,7 +299,7 @@ class SimpleBot:
             return response
             
         except Exception as e:
-            return f"自我改进过程中出错: {e}"
+            return f"���我改进过程中出错: {e}"
 
     def think(self, message: str) -> str:
         """使用认知系统进行思考"""
@@ -395,51 +398,53 @@ class SimpleBot:
         return combined_response, reflection
 
     def respond(self, message):
-        message = message.strip()
-        self.chat_history.append(message)
-        
-        # 检查是否是自我改进请求
-        if '自我优化' in message or '改进自己' in message:
-            return self.improve_self()
+        try:
+            logger.debug(f"收到消息: {message}")
+            message = message.strip()
+            self.chat_history.append(message)
             
-        # 检查是否是添加新功能请求
-        feature_match = re.search(r'添加新功能[：:](.*)', message)
-        if feature_match:
-            feature_description = feature_match.group(1).strip()
-            return self.improve_self(feature_description)
+            # 检查是否是自我改进请求
+            if '自我优化' in message or '改进自己' in message:
+                return self.improve_self()
             
-        # 检查是否是自主学习请求
-        learn_match = re.search(r'自主学习(.+)', message)
-        if learn_match:
-            topic = learn_match.group(1).strip()
-            return self.web_learner.start_learning(topic)
+            # 检查是否是添加新功能请求
+            feature_match = re.search(r'添加新功能[：:](.*)', message)
+            if feature_match:
+                feature_description = feature_match.group(1).strip()
+                return self.improve_self(feature_description)
             
-        # 检查学习状态
-        status_match = re.search(r'学习(.+)的进度', message)
-        if status_match:
-            topic = status_match.group(1).strip()
-            return self.web_learner.get_learning_status(topic)
+            # 检查是否是自主学习请求
+            learn_match = re.search(r'自主学习(.+)', message)
+            if learn_match:
+                topic = learn_match.group(1).strip()
+                return self.web_learner.start_learning(topic)
             
-        # 使用认知和情感系统思考
-        response, reflection = self.think_and_feel(message)
-        if response:
-            # 如果有改进建议，记录下来
-            if reflection['improvements']:
-                print("\n[内部改进建议]:")
-                for suggestion in reflection['improvements']:
-                    print(f"- {suggestion}")
-            return response
+            # 检查学习状态
+            status_match = re.search(r'学习(.+)的进度', message)
+            if status_match:
+                topic = status_match.group(1).strip()
+                return self.web_learner.get_learning_status(topic)
             
-        # 基础问答
-        responses = {
-            '你好': lambda: random.choice(self.greetings),
-            '你是谁': f'我是{self.name}，一个能够自主学习、思考和感知的智能机器人。我可以通过互联网学习新知识，具有独立的思维能力，还能理解和表达情感！我还能分析和优化自己的代码！',
-            '再见': '再见！希望很快能再次和你聊天！',
-            '你的心情': lambda: f"让我感受一下...{self.emotional.get_response()}",
-            '帮助': '''我可以:
+            # 使用认知和情感系统思考
+            response, reflection = self.think_and_feel(message)
+            if response:
+                # 如果有改进建议，记录下来
+                if reflection['improvements']:
+                    print("\n[内部改进建议]:")
+                    for suggestion in reflection['improvements']:
+                        print(f"- {suggestion}")
+                return response
+            
+            # 基础问答
+            responses = {
+                '你好': lambda: random.choice(self.greetings),
+                '你是谁': f'我是{self.name}，一个能够自主学习、思考和感知的智能机器人。我可以通过互联网学习新知识，具有独立的思维能力，还能理解和表达情感！我还能分析和优化自己的代码！',
+                '再见': '再见！希望很快能再次和你聊天！',
+                '你的心情': lambda: f"让我感受一下...{self.emotional.get_response()}",
+                '帮助': '''我可以:
 1. 打招呼和聊天
 2. 记住你的名字（试试说"我叫小明"）
-3. 做简单计��（如"计算 1+1"）
+3. 做简单计算（如"计算 1+1"）
 4. 显示时间
 5. 理解和表达情感：
    - 问我"你的心情"
@@ -461,23 +466,26 @@ class SimpleBot:
    - 说"自我优化"让我分析和改进自己
    - 说"添加新功能:xxx"让我设计新功能
    - 我会定期自动检查和优化自己的代码''',
-        }
-        
-        # 检查完整匹配
-        if message.lower() in responses:
-            response = responses[message.lower()]
-            return response() if callable(response) else response
+            }
             
-        # 如果没有找到答案，尝试自主学习
-        if not any(keyword in message for keyword in ['计算', '时间', '你好', '再见']):
-            return self.autonomous_learning(message)
+            # 检查完整匹配
+            if message.lower() in responses:
+                response = responses[message.lower()]
+                return response() if callable(response) else response
             
-        return random.choice([
-            '抱歉，我还不太明白你的意思',
-            '能换个方式说吗？',
-            '这个问题有点难，让我思考一下...',
-            '让我好好想想这个问题！'
-        ])
+            # 如果没有找到答案，尝试自主学习
+            if not any(keyword in message for keyword in ['计算', '时间', '你好', '再见']):
+                return self.autonomous_learning(message)
+            
+            return random.choice([
+                '抱歉，我还不太明白你的意思',
+                '能换个方式说吗？',
+                '这个问题有点难，让我思考一下...',
+                '让我好好想想这个问题！'
+            ])
+        except Exception as e:
+            logger.error(f"处理消息时出错: {str(e)}", exc_info=True)
+            return "抱歉，出现了一点问题。请稍后再试。"
 
     def __del__(self):
         """保存状态"""
