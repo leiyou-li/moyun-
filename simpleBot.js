@@ -12,7 +12,16 @@ class SimpleBot {
 
     respond(message) {
         message = message.trim().toLowerCase();
-        return this.responses[message] || '抱歉，我还不太明白你的意思。';
+        try {
+            return this.responses[message] || '抱歉，我还不太明白你的意思。';
+        } catch (error) {
+            console.error('Error details:', error);
+            if (error.name === 'DatabaseError') {
+                return '数据库连接出现问题，请稍后再试';
+            } else if (error.name === 'APIError') {
+                return 'API服务暂时不可用，请稍后再试';
+            }
+        }
     }
 }
 

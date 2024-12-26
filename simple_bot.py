@@ -17,6 +17,10 @@ import time
 from cognitive_system import CognitiveSystem
 from emotional_system import EmotionalState, SelfReflection
 from self_improvement import SelfImprovement
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class WebLearner:
     def __init__(self):
@@ -263,7 +267,7 @@ class SimpleBot:
                     
                 except Exception as e:
                     print(f"[自我优化] 出错: {e}")
-                    time.sleep(300)  # 出错后等待5分钟再试
+                    time.sleep(300)  # 出���后等待5分钟再试
                     
         # 启动优化线程
         thread = threading.Thread(target=improvement_loop)
@@ -354,7 +358,7 @@ class SimpleBot:
         return "\n".join(response_parts)
 
     def think_and_feel(self, message: str) -> Tuple[str, Dict[str, Any]]:
-        """思考并产生���感响应"""
+        """思考并产生情感响应"""
         # 更新情感状态
         context = {
             'chat_history': self.chat_history,
@@ -435,7 +439,7 @@ class SimpleBot:
             '帮助': '''我可以:
 1. 打招呼和聊天
 2. 记住你的名字（试试说"我叫小明"）
-3. 做简单计算（如"计算 1+1"）
+3. 做简单计��（如"计算 1+1"）
 4. 显示时间
 5. 理解和表达情感：
    - 问我"你的心情"
